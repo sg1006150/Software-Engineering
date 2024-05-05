@@ -36,14 +36,20 @@ public:
 
 private:
     Ui::Dialog *ui;
+    //初始化gui
     void initializeUI();
+    //生成合法的后缀表达式
     void genSuffixExp(QList<char> op,bool f,bool bracket,int maxnum,int number,QString addr);
+    //由后缀表达式转换为中缀表达式，并添加括号
     QString getInfixExp(QString exp,bool bracket);
+    //输出到文件
     void handleOuput(QString exp,QString addr);
+    //生成随机数
     double generateNumber(bool useFloat,int maxnum,int minnum);
+    //在打印机输出
     void handlePrinter(QString exp);
     QMap<QChar,int>priority;
-
+    //gui的实现
     QFormLayout* formLayout;
     QLineEdit* qnumEdit;
     QLineEdit* qmaxnumEdit;
