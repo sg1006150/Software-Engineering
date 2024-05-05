@@ -127,7 +127,7 @@ void Dialog::genSuffixExp(QList<char> op, bool f, bool bracket, int maxnum, int 
     int stknum=0;//记录栈中操作数的数量
     int numcount=0;
     int opcount=0;
-    while(numcount<=number)
+    while(numcount<number)
     {
         if(stknum<2)//如果栈中操作数小于2个，必须生成数字
         {
@@ -158,7 +158,7 @@ void Dialog::genSuffixExp(QList<char> op, bool f, bool bracket, int maxnum, int 
             }
         }
     }//操作符的数量必须等于操作数的数量-1
-    while(opcount<number)
+    while(opcount<number-1)
     {
         int randindex=generateNumber(0,op.size()-1,0);
         exp+=op[randindex];
