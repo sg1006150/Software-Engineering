@@ -6,10 +6,13 @@ Dialog::Dialog(QWidget *parent)
     , ui(new Ui::Dialog)
 {
     ui->setupUi(this);
+    //初始化图形界面
     initializeUI();
+    //连接"browse"按钮与filedialog对话框
     connect(browseButton,&QPushButton::clicked,this,[=]{
         this->fileBrowser->exec();
     });
+    //在选中文件时更新lineedit
     connect(fileBrowser,&QFileDialog::urlSelected,this,[=](const QUrl S){
         outputPath=S.toString().mid(8);
         fileURL->setText(outputPath);
@@ -18,6 +21,7 @@ Dialog::Dialog(QWidget *parent)
             {
         this->close();
     });
+    //实现用户点击ok之后的逻辑
     connect(buttonBox,&QDialogButtonBox::accepted,this,[=]
             {
         QList<char>op;
@@ -33,6 +37,7 @@ Dialog::Dialog(QWidget *parent)
         if(mulCheckbox->isChecked())op.append('*');
         if(bracketCheckbox->isChecked())bracket=1;
         if(floatCheckbox->isChecked())flo=1;
+        //至少要选中一个符号
         if(op.size()==0)
             {
             QMessageBox box;
@@ -47,6 +52,7 @@ Dialog::Dialog(QWidget *parent)
         }
 
     });
+    //设置优先级
     priority['+']=1;
     priority['-']=1;
     priority['/']=2;
@@ -61,6 +67,7 @@ void Dialog::initializeUI()
     qmaxnumEdit->setClearButtonEnabled(true);
     quantityEdit=new QLineEdit;
     quantityEdit->setClearButtonEnabled(true);
+    //限制用户只能输入整数
     quantityEdit->setValidator(new QIntValidator(this->quantityEdit));
     qnumEdit->setValidator(new QIntValidator(this->qnumEdit));
     qmaxnumEdit->setValidator(new QIntValidator(this->qmaxnumEdit));
@@ -69,6 +76,7 @@ void Dialog::initializeUI()
     qoutputBox->addItem("Printer");
     buttonBox=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
     textEdit=new QTextEdit;
+    //设置textedit只读
     textEdit->setReadOnly(true);
     mainLayout=new QHBoxLayout;
     configureLayout=new QVBoxLayout;
@@ -89,6 +97,7 @@ void Dialog::initializeUI()
     formLayout->addRow("Length:",qnumEdit);
     formLayout->addRow("Maxnum:",qmaxnumEdit);
     formLayout->addRow("Quantity",quantityEdit);
+    //安排checkbox的布局
     gridLayout->addWidget(plusCheckbox, 0, 0);
     gridLayout->addWidget(minusCheckbox, 0, 1);
     gridLayout->addWidget(subCheckbox, 0, 2);
@@ -115,12 +124,12 @@ void Dialog::initializeUI()
 void Dialog::genSuffixExp(QList<char> op, bool f, bool bracket, int maxnum, int number, QString addr)
 {
     QString exp="";
-    int stknum=0;
+    int stknum=0;//记录栈中操作数的数量
     int numcount=0;
     int opcount=0;
     while(numcount<=number)
     {
-        if(stknum<2)
+        if(stknum<2)//如果栈中操作数小于2个，必须生成数字
         {
             auto randomnum=generateNumber(f,maxnum,1);
             stknum++;
@@ -128,7 +137,7 @@ void Dialog::genSuffixExp(QList<char> op, bool f, bool bracket, int maxnum, int 
             exp+=QString::number(randomnum);
             exp+=' ';
         }
-        else
+        else//如果多于2个，可以生成数字或操作符
         {
             bool isop=generateNumber(0,1,0);
             if(isop)
@@ -148,7 +157,7 @@ void Dialog::genSuffixExp(QList<char> op, bool f, bool bracket, int maxnum, int 
                 exp+=' ';
             }
         }
-    }
+    }//操作符的数量必须等于操作数的数量-1
     while(opcount<number)
     {
         int randindex=generateNumber(0,op.size()-1,0);
@@ -168,8 +177,8 @@ QString Dialog::getInfixExp(QString exp,bool bracket)
         if(i=='/'||i=='+'||i=='-'||i=='*')ops.append(i);
     }
     int pos=0;
-    QStringList tokens = exp.split(" ");
-    QStack<QString> exp_stk;
+    QStringList tokens = exp.split(" ");//按空格将操作数和操作符分组
+    QStack<QString> exp_stk;//存储表达式的栈
     QString a,b,c;
     for(auto i:tokens)
     {
@@ -179,7 +188,7 @@ QString Dialog::getInfixExp(QString exp,bool bracket)
             b = exp_stk.top(); exp_stk.pop();
             a = exp_stk.top(); exp_stk.pop();
             pos++;
-            if (pos < ops.size() &&priority[ops[pos]] > priority[i.at(0)]&&bracket)
+            if (pos < ops.size() &&priority[ops[pos]] > priority[i.at(0)]&&bracket)//按优先级决定是否添加括号
             {
                 c = "(" + a + i+ b+")";
             }
@@ -207,7 +216,7 @@ double Dialog::generateNumber(bool useFloat, int maxnum,int minnum)
 }
 void Dialog::handleOuput(QString exp, QString addr)
 {
-
+    //更新到textedit
     this->textEdit->append(exp);
     this->textEdit->append("\n");
     QString path=addr+"/out.txt";
@@ -235,4 +244,3 @@ Dialog::~Dialog()
 {
     delete ui;
 }
-
